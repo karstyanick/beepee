@@ -58,9 +58,47 @@ function App() {
     9: "",
   });
 
+  const [displayedRule, setDisplayedRule] = useState("");
+
   const customRulesRef = useRef<HTMLInputElement>(null);
+  const [showInit, setShowInit] = useState(true);
+  const [showReset, setShowReset] = useState(false);
 
   useEffect(() => {}, []);
+
+  const onResetClick = () => {
+    setDisplayedRule("");
+    const cups = document.getElementsByClassName("cup");
+    Array.from(cups).forEach((cup) => {
+      cup.classList.remove("clickedCup");
+    });
+    setTeam1Cups({
+      0: "",
+      1: "",
+      2: "",
+      3: "",
+      4: "",
+      5: "",
+      6: "",
+      7: "",
+      8: "",
+      9: "",
+    });
+    setTeam2Cups({
+      0: "",
+      1: "",
+      2: "",
+      3: "",
+      4: "",
+      5: "",
+      6: "",
+      7: "",
+      8: "",
+      9: "",
+    });
+    setShowInit(true);
+    setShowReset(false);
+  };
 
   function chooseRules(teamCupsToSet: any) {
     const cloneSingleOccurenceRules = [...SINGLE_OCCURENCE_RULES];
@@ -124,28 +162,64 @@ function App() {
 
     setTeam1Cups(team1CupsToSet);
     setTeam2Cups(team2CupsToSet);
+    setShowInit(false);
+    setShowReset(true);
   }
 
   return (
     <div>
-      <input
-        ref={customRulesRef}
-        className="customRuleInput"
-        placeholder="Add custom rules if needed (rule1, rule2, ...)"
-      ></input>
-
-      <button className="startButton" onClick={initilizeCups}>
-        Start
-      </button>
-
-      <div>
-        <Cups teamCups={team1Cups} orientation="secondary"></Cups>
-      </div>
-      <br />
-      <br />
-      <div>
-        <Cups teamCups={team2Cups} orientation="primary"></Cups>
-      </div>
+      {showInit && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            flexDirection: "column",
+            height: "100vh",
+            gap: "20px",
+          }}
+        >
+          {/* <h1 className="title">Bee Pee nespa</h1> */}
+          <input
+            ref={customRulesRef}
+            className="customRuleInput"
+            placeholder="Add custom rules if needed (rule1, rule2, ...)"
+          ></input>
+          <button className="startButton" onClick={initilizeCups}>
+            Start
+          </button>
+        </div>
+      )}
+      {!showInit && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100vh",
+            flexDirection: "column",
+          }}
+        >
+          <Cups
+            setDisplayedRule={setDisplayedRule}
+            teamCups={team1Cups}
+            orientation="secondary"
+          ></Cups>
+          <br />
+          <br />
+          <Cups
+            setDisplayedRule={setDisplayedRule}
+            teamCups={team2Cups}
+            orientation="primary"
+          ></Cups>
+          <span className="displayedRule">{displayedRule}</span>
+          {showReset && (
+            <button className="resetButton" onClick={onResetClick}>
+              Reset
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

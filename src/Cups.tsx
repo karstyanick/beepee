@@ -17,21 +17,25 @@ interface TeamCups {
 interface CupsProps {
   teamCups: TeamCups;
   orientation: "primary" | "secondary";
+  setDisplayedRule: (rule: string) => void;
 }
 
-const Cups: React.FC<CupsProps> = ({ teamCups, orientation }) => {
+const Cups: React.FC<CupsProps> = ({
+  teamCups,
+  orientation,
+  setDisplayedRule,
+}) => {
   const row1 = [teamCups[0]];
   const row2 = [teamCups[1], teamCups[2]];
   const row3 = [teamCups[3], teamCups[4], teamCups[5]];
   const row4 = [teamCups[6], teamCups[7], teamCups[8], teamCups[9]];
 
   const onCupClick = (rule: string, cupId: string) => {
-    // Change the class of the clicked button to "clickedCup"
+    setDisplayedRule(rule);
     const clickedCup = document.getElementById(cupId);
     if (clickedCup) {
       clickedCup.classList.add("clickedCup");
     }
-    alert(`Rule ${rule} clicked!`);
   };
 
   return (
