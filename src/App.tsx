@@ -1,6 +1,59 @@
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
-import Cups from "./Cups";
+import Cups, { TeamCups } from "./Cups";
+
+const INITIAL_CUP_STATE = {
+  0: {
+    rule: "",
+    hit: false,
+    index: 0,
+  },
+  1: {
+    rule: "",
+    hit: false,
+    index: 1,
+  },
+  2: {
+    rule: "",
+    hit: false,
+    index: 2,
+  },
+  3: {
+    rule: "",
+    hit: false,
+    index: 3,
+  },
+  4: {
+    rule: "",
+    hit: false,
+    index: 4,
+  },
+  5: {
+    rule: "",
+    hit: false,
+    index: 5,
+  },
+  6: {
+    rule: "",
+    hit: false,
+    index: 6,
+  },
+  7: {
+    rule: "",
+    hit: false,
+    index: 7,
+  },
+  8: {
+    rule: "",
+    hit: false,
+    index: 8,
+  },
+  9: {
+    rule: "",
+    hit: false,
+    index: 9,
+  },
+};
 
 const SINGLE_OCCURENCE_RULES = [
   "EX",
@@ -32,31 +85,8 @@ function shuffleArray(array: number[]): number[] {
 }
 
 function App() {
-  const [team1Cups, setTeam1Cups] = useState({
-    0: "",
-    1: "",
-    2: "",
-    3: "",
-    4: "",
-    5: "",
-    6: "",
-    7: "",
-    8: "",
-    9: "",
-  });
-
-  const [team2Cups, setTeam2Cups] = useState({
-    0: "",
-    1: "",
-    2: "",
-    3: "",
-    4: "",
-    5: "",
-    6: "",
-    7: "",
-    8: "",
-    9: "",
-  });
+  const [team1Cups, setTeam1Cups] = useState(INITIAL_CUP_STATE);
+  const [team2Cups, setTeam2Cups] = useState(INITIAL_CUP_STATE);
 
   const [displayedRule, setDisplayedRule] = useState("");
 
@@ -72,35 +102,13 @@ function App() {
     Array.from(cups).forEach((cup) => {
       cup.classList.remove("clickedCup");
     });
-    setTeam1Cups({
-      0: "",
-      1: "",
-      2: "",
-      3: "",
-      4: "",
-      5: "",
-      6: "",
-      7: "",
-      8: "",
-      9: "",
-    });
-    setTeam2Cups({
-      0: "",
-      1: "",
-      2: "",
-      3: "",
-      4: "",
-      5: "",
-      6: "",
-      7: "",
-      8: "",
-      9: "",
-    });
+    setTeam1Cups(INITIAL_CUP_STATE);
+    setTeam2Cups(INITIAL_CUP_STATE);
     setShowInit(true);
     setShowReset(false);
   };
 
-  function chooseRules(teamCupsToSet: any) {
+  function chooseRules(teamCupsToSet: TeamCups) {
     const cloneSingleOccurenceRules = [...SINGLE_OCCURENCE_RULES];
 
     const chosenSingleOccurenceRules = [];
@@ -133,19 +141,20 @@ function App() {
 
     for (let i = 0; i < 10; i++) {
       if (chosenCustomRules.length > 0) {
-        teamCupsToSet[populateSequence[i]] = chosenCustomRules[0];
+        teamCupsToSet[populateSequence[i]].rule = chosenCustomRules[0];
         chosenCustomRules.splice(0, 1);
         continue;
       }
 
       if (chosenSingleOccurenceRules.length > 0) {
-        teamCupsToSet[populateSequence[i]] = chosenSingleOccurenceRules[0];
+        teamCupsToSet[populateSequence[i]].rule = chosenSingleOccurenceRules[0];
         chosenSingleOccurenceRules.splice(0, 1);
         continue;
       }
 
       if (chosenMultipleOccurenceRules.length > 0) {
-        teamCupsToSet[populateSequence[i]] = chosenMultipleOccurenceRules[0];
+        teamCupsToSet[populateSequence[i]].rule =
+          chosenMultipleOccurenceRules[0];
         chosenMultipleOccurenceRules.splice(0, 1);
         continue;
       }
@@ -157,8 +166,8 @@ function App() {
   }
 
   function initilizeCups() {
-    const team1CupsToSet = chooseRules({});
-    const team2CupsToSet = chooseRules({});
+    const team1CupsToSet = chooseRules(INITIAL_CUP_STATE);
+    const team2CupsToSet = chooseRules(INITIAL_CUP_STATE);
 
     setTeam1Cups(team1CupsToSet);
     setTeam2Cups(team2CupsToSet);
@@ -204,6 +213,7 @@ function App() {
             setDisplayedRule={setDisplayedRule}
             teamCups={team1Cups}
             orientation="secondary"
+            setTeamCups={setTeam1Cups}
           ></Cups>
           <br />
           <br />
@@ -211,6 +221,7 @@ function App() {
             setDisplayedRule={setDisplayedRule}
             teamCups={team2Cups}
             orientation="primary"
+            setTeamCups={setTeam2Cups}
           ></Cups>
           <span className="displayedRule">{displayedRule}</span>
           {showReset && (
