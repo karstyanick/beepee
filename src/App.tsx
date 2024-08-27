@@ -201,13 +201,7 @@ function App() {
       )}
       {!showInit && (
         <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100vh",
-            flexDirection: "column",
-          }}
+          className="globalWrapper"
         >
           <Cups
             setDisplayedRule={setDisplayedRule}
@@ -215,20 +209,20 @@ function App() {
             orientation="secondary"
             setTeamCups={setTeam1Cups}
           ></Cups>
-          <br />
-          <br />
           <Cups
             setDisplayedRule={setDisplayedRule}
             teamCups={team2Cups}
             orientation="primary"
             setTeamCups={setTeam2Cups}
           ></Cups>
-          <span className="displayedRule">{displayedRule}</span>
-          {showReset && (
-            <button className="resetButton" onClick={onResetClick}>
-              Reset
-            </button>
-          )}
+          <div className="gameState">
+            <span className="displayedRule">{displayedRule}</span>
+            {showReset && (
+              <button className="resetButton" onClick={onResetClick}>
+                Reset
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>

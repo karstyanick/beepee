@@ -36,15 +36,10 @@ const Cups: React.FC<CupsProps> = ({
 }) => {
   const [pattern, setPattern] = useState("default");
   const [availablePatterns, setAvailablePatterns] = useState<string[]>([]);
-  const [usedEmstellen, setUsedEmstellen] = useState(0);
+  const [usedEmstellen, setUsedEmstellen] = useState(0); 
 
-  const row1 = [teamCups[0]];
-  const row2 = [teamCups[1], teamCups[2]];
-  const row3 = [teamCups[3], teamCups[4], teamCups[5]];
-  const row4 = [teamCups[6], teamCups[7], teamCups[8], teamCups[9]];
-
-  const rows = [row1, row2, row3, row4];
-  const rowsSecondary = [row4, row3, row2, row1];
+  const [cupArrays, setCupArrays] = useState<CupStatus[][]>([]);
+  const [cupArrayOrientation, setCupArrayOrientation] = useState<"horizontal" | "vertical">("horizontal");
 
   const changePattern = (pattern: string) => {
     setPattern(pattern);
@@ -61,6 +56,77 @@ const Cups: React.FC<CupsProps> = ({
       },
     });
   };
+
+  useEffect(() => {
+    const remainingCups = Object.values(teamCups).filter((cup) => !cup.hit);
+    
+    if (pattern === "Pfeil"){
+      setCupArrayOrientation("horizontal");
+      if (orientation === "secondary") {
+        populateCupArray(remainingCups, [1, 3, 2, 1])
+      }else{
+        populateCupArray(remainingCups, [1, 2, 3, 1])
+      }
+    }
+  
+    if (pattern === "Kleng pyramide"){
+      setCupArrayOrientation("horizontal");
+      if (orientation === "primary") {
+        populateCupArray(remainingCups, [1, 2, 3])
+      }else{
+        populateCupArray(remainingCups, [3, 2, 1])
+      }
+    }
+
+    if (pattern === "Tirette"){
+      setCupArrayOrientation("vertical");
+      if (orientation === "secondary") {
+        populateCupArray(remainingCups, [3, 2])
+      }else {
+        populateCupArray(remainingCups, [2, 3])
+      }
+    }
+
+    if (pattern === "Raute"){
+      setCupArrayOrientation("horizontal");
+      populateCupArray(remainingCups, [1, 2, 1])
+    }
+
+    if (pattern === "Mini pyramide"){
+      setCupArrayOrientation("horizontal");
+      if (orientation === "secondary") {
+        populateCupArray(remainingCups, [2, 1])
+      }else {
+        populateCupArray(remainingCups, [1, 2])
+      }
+    }
+
+    if (pattern === "Ligne"){
+      setCupArrayOrientation("horizontal");
+      populateCupArray(remainingCups, [1, 1])
+    }
+  }, [pattern]);
+
+  const populateCupArray = (cupsArray: any[], pattern: number[]) => {
+    const resultArray = []
+    
+    for (let i=0; i<4; i++) {
+      if(pattern[i] !== 0){
+        resultArray[i] = cupsArray.splice(0, pattern[i])
+      }
+    }
+
+    setCupArrays(resultArray)
+  }
+
+  useEffect(() => {
+    if ( orientation === "primary") {
+      populateCupArray(Object.values(teamCups), [1, 2, 3, 4])
+    }
+    if ( orientation === "secondary") {
+      populateCupArray(Object.values(teamCups), [4, 3, 2, 1])
+    }
+  }, []);
 
   useEffect(() => {
     setAvailablePatterns(computeAvailablePatterns());
@@ -95,58 +161,41 @@ const Cups: React.FC<CupsProps> = ({
 
   return (
     <>
-      {orientation === "primary" && (
-        <div className="cupWrapper">
-          {rows.map((row) => {
-            return (
-              <div className="cupRow">
-                {row.map((cup) => (
-                  <Cup
-                    setHit={() => setHit(cup.index as any)}
-                    rule={cup.rule}
-                    cupId={`${cup.index}-primary`}
-                    setDisplayedRule={setDisplayedRule}
-                  ></Cup>
-                ))}
-              </div>
-            );
-          })}
-          {availablePatterns.map((pattern) => (
-            <button
-              className="changePatternButtonBottom"
-              onClick={() => changePattern(pattern)}
-            >
-              {pattern}
-            </button>
-          ))}
-        </div>
-      )}
-      {orientation === "secondary" && (
-        <div className="cupWrapper">
-          {availablePatterns.map((pattern) => (
-            <button
-              className="changePatternButtonTop"
-              onClick={() => changePattern(pattern)}
-            >
-              {pattern}
-            </button>
-          ))}
-          {rowsSecondary.map((row) => {
-            return (
-              <div className="cupRow">
-                {row.map((cup) => (
-                  <Cup
-                    setHit={() => setHit(cup.index as any)}
-                    rule={cup.rule}
-                    cupId={`${cup.index}-secondary`}
-                    setDisplayedRule={setDisplayedRule}
-                  ></Cup>
-                ))}
-              </div>
-            );
-          })}
-        </div>
-      )}
+      <div className={cupArrayOrientation === "horizontal" ? "cupWrapper" : "verticalCupWrapper"}>
+        {orientation === "secondary" && availablePatterns.map((pattern) => (
+          <button
+            key={`secondary-${pattern}`}
+            className="changePatternButtonTop"
+            onClick={() => changePattern(pattern)}
+          >
+            {pattern}
+          </button>
+        ))}
+        {cupArrays.map((row, index) => {
+          return (
+            <div key={`row-${index}-${orientation}`} className={cupArrayOrientation === "horizontal" ? "cupRow" : "verticalCupRow"}>
+              {row.map((cup) => (
+                <Cup
+                  setHit={() => setHit(cup.index as any)}
+                  rule={cup.rule}
+                  cupId={`${cup.index}-${orientation}`}
+                  setDisplayedRule={setDisplayedRule}
+                  key={`cups-${cup.index}-${orientation}`}
+                ></Cup>
+              ))}
+            </div>
+          );
+        })}
+        {orientation === "primary" && availablePatterns.map((pattern) => (
+          <button
+            key={`primary-${pattern}`}
+            className="changePatternButtonBottom"
+            onClick={() => changePattern(pattern)}
+          >
+            {pattern}
+          </button>
+        ))}
+      </div>
     </>
   );
 };

@@ -17,6 +17,7 @@
   font-weight: bold;
   color: #000;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .clickedCup {
@@ -24,8 +25,9 @@
   color: #fff;
 }
 
-.changePatternButtonBottom {
-  margin-top: 20px;
+.changePatternButtonTop {
+  position: relative;
+  margin-bottom: 10px;
   padding: 10px;
   background-color: #007bff;
   color: #fff;
@@ -34,8 +36,9 @@
   cursor: pointer;
 }
 
-.changePatternButtonTop {
-  margin-bottom: 20px;
+.changePatternButtonBottom {
+  position: relative;
+  margin-top: 10px;
   padding: 10px;
   background-color: #007bff;
   color: #fff;
@@ -48,4 +51,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.verticalCupWrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.verticalCupRow {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }

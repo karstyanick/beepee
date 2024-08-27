@@ -8,7 +8,7 @@ interface CupProps {
   cupId: string;
 }
 
-const Cups: React.FC<CupProps> = ({
+const Cup: React.FC<CupProps> = ({
   setDisplayedRule,
   cupId,
   rule,
@@ -26,11 +26,10 @@ const Cups: React.FC<CupProps> = ({
   return (
     <div
       className="cup"
-      key={cupId}
       id={cupId}
       onClick={() => onCupClick(rule, cupId)}
     ></div>
   );
 };
 
-export default Cups;
+export default Cup;

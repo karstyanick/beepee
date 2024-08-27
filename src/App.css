@@ -13,6 +13,15 @@
   margin-top: 0.5rem;
 }
 
+.globalWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 85vh;
+  flex-direction: column;
+  gap: 50px;
+}
+
 .startButton {
   width: 90%;
   padding: 0.5rem;
@@ -55,4 +64,17 @@
   margin-top: 1rem;
   text-align: center;
   max-width: 90%;
+}
+
+.gameState {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: absolute;
+  left: 50%;
+  bottom: 5%;
+  transform: translateX(-50%);
+  padding: 10px;
+  width: 90%;
 }
