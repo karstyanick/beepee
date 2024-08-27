@@ -19,7 +19,7 @@
   align-items: center;
   height: 85vh;
   flex-direction: column;
-  gap: 50px;
+  gap: 40px;
 }
 
 .startButton {
