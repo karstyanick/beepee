@@ -57,12 +57,10 @@ const INITIAL_CUP_STATE = {
 
 const SINGLE_OCCURENCE_RULES = [
   "EX",
-  "SPRETZ",
   "GEDRENKS/BEIER EXEN",
   "TRICHTER",
   "SHOT FIR TEAM",
   "0.3 BEIER VERDEELEN",
-  "SPRETZ AM TEAM DEELEN",
 ];
 const MULTIPLE_OCCURENCE_RULES = [
   "SHOT",
@@ -94,7 +92,7 @@ function App() {
   const [showInit, setShowInit] = useState(true);
   const [showReset, setShowReset] = useState(false);
 
-  useEffect(() => {}, []);
+  useEffect(() => { }, []);
 
   const onResetClick = () => {
     setDisplayedRule("");
