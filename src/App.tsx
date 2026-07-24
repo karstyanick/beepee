@@ -1,6 +1,15 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import Cups, { TeamCups } from "./Cups";
+import RuleSettings from "./RuleSettings";
+import {
+  Rule,
+  TOTAL_CUPS,
+  loadRules,
+  loadSingleRuleCount,
+  saveRules,
+  saveSingleRuleCount,
+} from "./rules";
 
 const INITIAL_CUP_STATE = {
   0: {
@@ -55,26 +64,11 @@ const INITIAL_CUP_STATE = {
   },
 };
 
-const SINGLE_OCCURENCE_RULES = [
-  "EX",
-  "GEDRENKS/BEIER EXEN",
-  "TRICHTER",
-  "SHOT FIR TEAM",
-  "0.3 BEIER VERDEELEN",
-];
-const MULTIPLE_OCCURENCE_RULES = [
-  "SHOT",
-  "NEXT RONN AANER HAND",
-  "NEXT RONN 1 SCHOSS MEI",
-  "NEXT RONN 1 SCHOSS MANNER",
-  "NEXTEN SCHOSS TRICKSCHOT",
-  "JIDEREEN GLAICHZAITEG SCHEISSEN",
-  "NEXT RONN AANER HAND",
-  "BECHER ENGEM AANEREN GIN",
-  "NEXT RONN AAN ZOU",
-];
+function cloneInitialCupState(): TeamCups {
+  return JSON.parse(JSON.stringify(INITIAL_CUP_STATE));
+}
 
-function shuffleArray(array: number[]): number[] {
+function shuffleArray<T>(array: T[]): T[] {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [array[i], array[j]] = [array[j], array[i]]; // Swap elements
@@ -83,16 +77,38 @@ function shuffleArray(array: number[]): number[] {
 }
 
 function App() {
-  const [team1Cups, setTeam1Cups] = useState(INITIAL_CUP_STATE);
-  const [team2Cups, setTeam2Cups] = useState(INITIAL_CUP_STATE);
+  const [team1Cups, setTeam1Cups] = useState<TeamCups>(cloneInitialCupState);
+  const [team2Cups, setTeam2Cups] = useState<TeamCups>(cloneInitialCupState);
 
   const [displayedRule, setDisplayedRule] = useState("");
 
-  const customRulesRef = useRef<HTMLInputElement>(null);
+  const [rules, setRules] = useState<Rule[]>(loadRules);
+  const [singleRuleCount, setSingleRuleCount] = useState<number>(loadSingleRuleCount);
   const [showInit, setShowInit] = useState(true);
   const [showReset, setShowReset] = useState(false);
 
-  useEffect(() => { }, []);
+  useEffect(() => {
+    saveRules(rules);
+  }, [rules]);
+
+  useEffect(() => {
+    saveSingleRuleCount(singleRuleCount);
+  }, [singleRuleCount]);
+
+  const enabledRules = rules.filter((rule) => rule.enabled);
+  const enabledSingleRuleCount = enabledRules.filter(
+    (rule) => rule.type === "single"
+  ).length;
+  const enabledMultipleRuleCount = enabledRules.length - enabledSingleRuleCount;
+  const canFillAllCups =
+    enabledMultipleRuleCount > 0 || enabledSingleRuleCount >= TOTAL_CUPS;
+
+  useEffect(() => {
+    const max = Math.min(TOTAL_CUPS, enabledSingleRuleCount);
+    if (singleRuleCount > max) {
+      setSingleRuleCount(max);
+    }
+  }, [enabledSingleRuleCount, singleRuleCount]);
 
   const onResetClick = () => {
     setDisplayedRule("");
@@ -100,36 +116,34 @@ function App() {
     Array.from(cups).forEach((cup) => {
       cup.classList.remove("clickedCup");
     });
-    setTeam1Cups(INITIAL_CUP_STATE);
-    setTeam2Cups(INITIAL_CUP_STATE);
+    setTeam1Cups(cloneInitialCupState());
+    setTeam2Cups(cloneInitialCupState());
     setShowInit(true);
     setShowReset(false);
   };
 
   function chooseRules(teamCupsToSet: TeamCups) {
-    const cloneSingleOccurenceRules = [...SINGLE_OCCURENCE_RULES];
+    const singlePool = shuffleArray(
+      enabledRules.filter((rule) => rule.type === "single").map((rule) => rule.text)
+    );
+    const multiplePool = enabledRules
+      .filter((rule) => rule.type === "multiple")
+      .map((rule) => rule.text);
 
-    const chosenSingleOccurenceRules = [];
-    const chosenMultipleOccurenceRules = [];
-    const chosenCustomRules = customRulesRef.current?.value
-      ? customRulesRef.current?.value.split(",")
-      : [];
+    const chosenRules: string[] = singlePool.slice(0, singleRuleCount);
+    let singleIndex = chosenRules.length;
 
-    for (let i = 0; i < 5; i++) {
-      const randomIndex = Math.floor(
-        Math.random() * cloneSingleOccurenceRules.length
-      );
-      const randomRule = cloneSingleOccurenceRules[randomIndex];
-      chosenSingleOccurenceRules.push(randomRule);
-      cloneSingleOccurenceRules.splice(randomIndex, 1);
-    }
-
-    for (let i = 0; i < 5; i++) {
-      const randomIndex = Math.floor(
-        Math.random() * MULTIPLE_OCCURENCE_RULES.length
-      );
-      const randomRule = MULTIPLE_OCCURENCE_RULES[randomIndex];
-      chosenMultipleOccurenceRules.push(randomRule);
+    while (chosenRules.length < TOTAL_CUPS) {
+      if (multiplePool.length > 0) {
+        chosenRules.push(
+          multiplePool[Math.floor(Math.random() * multiplePool.length)]
+        );
+      } else if (singleIndex < singlePool.length) {
+        chosenRules.push(singlePool[singleIndex]);
+        singleIndex++;
+      } else {
+        chosenRules.push("");
+      }
     }
 
     const numbers = Array.from({ length: 10 }, (_, index) => index);
@@ -138,34 +152,15 @@ function App() {
     >;
 
     for (let i = 0; i < 10; i++) {
-      if (chosenCustomRules.length > 0) {
-        teamCupsToSet[populateSequence[i]].rule = chosenCustomRules[0];
-        chosenCustomRules.splice(0, 1);
-        continue;
-      }
-
-      if (chosenSingleOccurenceRules.length > 0) {
-        teamCupsToSet[populateSequence[i]].rule = chosenSingleOccurenceRules[0];
-        chosenSingleOccurenceRules.splice(0, 1);
-        continue;
-      }
-
-      if (chosenMultipleOccurenceRules.length > 0) {
-        teamCupsToSet[populateSequence[i]].rule =
-          chosenMultipleOccurenceRules[0];
-        chosenMultipleOccurenceRules.splice(0, 1);
-        continue;
-      }
+      teamCupsToSet[populateSequence[i]].rule = chosenRules[i];
     }
-
-    console.log(`teamCupsToSet`, teamCupsToSet);
 
     return teamCupsToSet;
   }
 
   function initilizeCups() {
-    const team1CupsToSet = chooseRules(INITIAL_CUP_STATE);
-    const team2CupsToSet = chooseRules(INITIAL_CUP_STATE);
+    const team1CupsToSet = chooseRules(cloneInitialCupState());
+    const team2CupsToSet = chooseRules(cloneInitialCupState());
 
     setTeam1Cups(team1CupsToSet);
     setTeam2Cups(team2CupsToSet);
@@ -176,23 +171,18 @@ function App() {
   return (
     <div>
       {showInit && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            flexDirection: "column",
-            height: "100vh",
-            gap: "20px",
-          }}
-        >
-          {/* <h1 className="title">Bee Pee nespa</h1> */}
-          <input
-            ref={customRulesRef}
-            className="customRuleInput"
-            placeholder="Add custom rules if needed (rule1, rule2, ...)"
-          ></input>
-          <button className="startButton" onClick={initilizeCups}>
+        <div className="initWrapper">
+          <RuleSettings
+            rules={rules}
+            setRules={setRules}
+            singleRuleCount={singleRuleCount}
+            setSingleRuleCount={setSingleRuleCount}
+          />
+          <button
+            className="startButton"
+            onClick={initilizeCups}
+            disabled={!canFillAllCups}
+          >
             Start
           </button>
         </div>
